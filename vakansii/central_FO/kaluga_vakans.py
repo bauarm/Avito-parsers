@@ -1,4 +1,5 @@
 import requests
+import hashlib
 from bs4 import BeautifulSoup
 import datetime
 import csv
@@ -25,18 +26,18 @@ def transform_date(data):
 
 
 def write_csv(data):
-	today=datetime.date.today()
-	file_name= str("{}_{}_{}_moskva_vakansii".format(today.day, today.month, today.year)) + '.csv'
-	#print(file_name)
+	today=datetime.datetime.now()
+	file_name= str("./work_files/kaluga_vakans/kaluga&obl_vakant_{}_{}_{}__{}_{}".format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
 	with open(file_name, 'a', newline='') as f:
 		writer = csv.writer(f)
-		writer.writerow((data['name'],
-                         data['wage'],
-                         data['date'],
-                         data['town'],
-						 data['firm'],
-						 data['link']
-						 ))
+		writer.writerow((data['id'],
+						data['name'],
+                        data['wage'],
+                        data['date'],
+                        data['town'],
+						data['firm'],
+						data['link']
+						))
 def get_page(url):
 	headers={'accept':'*/*',
 		'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'}
@@ -52,12 +53,10 @@ def get_page(url):
 def get_html(soup):
 	block=soup.find_all('div', class_='item_table-wrapper')
 	page_count=soup.find_all('a', class_='pagination-page')
-	print('pages' + str(len(page_count)))
-	print(len(block))
-	#print('*******')
 	try:
 		for item in block:
-			data = {'name': find_vacans(item),
+			data = {'id': get_id(find_link(item)),
+					'name': find_vacans(item),
 					'wage': find_wage(item),
 					'date': transform_date(find_date(item)),
 					'town': ' '.join(find_town(item).split()),
@@ -79,7 +78,7 @@ def find_wage(link):
 	wage=link.find('span', class_='price')
 	elem=wage.get('content')
 	#print(elem)
-	return elem
+	return int(elem)
 
 def find_date(link):
 	date=link.find('div', class_='js-item-date')
@@ -93,6 +92,11 @@ def find_link(link):
 	#print(elem)	
 	return elem
 
+def get_id (link):
+	id=hashlib.sha1(bytes(link, encoding= 'utf-8')).hexdigest()
+	#print(id)	
+	return id
+
 def find_town(link):
 	p=link.find('div', class_='data')
 	elem=p.find_all('p')
@@ -105,13 +109,29 @@ def find_firm(link):
 	#print(elem)	
 	return elem[1].text
 
+def get_pagination_last(url):
+	fir_page='1'
+	url = url.format(str(fir_page))
+	soup=get_page(url)
+	pag_list=soup.find_all('a', class_='pagination-page')
+	
+	for pag in pag_list:
+		text_checker=pag.text
+		
+		if 'Последняя' in text_checker:
+			last_url=pag.get('href').split('=')[1]
+			
+			return int(last_url)
+		else:
+			continue
+
 def main():
-	areas=['https://www.avito.ru/moskva/vakansii?p={}']
+	areas=['https://www.avito.ru/kaluga/vakansii?p={}']
 	
 	try:
 		for pattern in areas:
-			for i in range(1, 6):
-				print('*****',i ,'*******')
+			last_count=get_pagination_last(pattern)
+			for i in range(1, last_count):
 				url = pattern.format(str(i))
 				get_html(get_page(url))
 	except:
