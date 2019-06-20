@@ -25,7 +25,7 @@ def transform_date(data):
 
 def write_csv(data):
 	today=datetime.date.today()
-	file_name= str("{}_{}_{}_test_id2".format(today.day, today.month, today.year)) + '.csv'
+	file_name= str("./work_files/kaluga_vakans/kaluga&obl_vakant_{}_{}_{}__{}_{}".format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
 	#print(file_name)
 	with open(file_name, 'a', newline='') as f:
 		writer = csv.writer(f)
@@ -131,7 +131,7 @@ def main():
 		for pattern in areas:
 			last_count=get_pagination_last(pattern)
 			
-			for i in range(1, 4):
+			for i in range(1, last_count):
 				print('*****',i ,'*******')
 				url = pattern.format(str(i))
 				get_html(get_page(url))
