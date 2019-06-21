@@ -28,16 +28,15 @@ def transform_date(data):
 def write_csv(data):
 	today=datetime.datetime.now()
 	file_name= str("./work_files/kaluga_vakans/kaluga&obl_vakant_{}_{}_{}__{}_{}".format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
-	with open(file_name, 'a', newline='') as f:
-		writer = csv.writer(f)
-		writer.writerow((data['id'],
-						data['name'],
-                        data['wage'],
-                        data['date'],
-                        data['town'],
-						data['firm'],
-						data['link']
-						))
+	fieldnames = ['id','name','wage','date','town','firm','link']
+	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
+		writer = csv.DictWriter(f, fieldnames=fieldnames)
+		writer.writeheader()
+		for note in data:
+			writer.writerow(note)
+		
+
+
 def get_page(url):
 	headers={'accept':'*/*',
 		'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'}
@@ -53,19 +52,20 @@ def get_page(url):
 def get_html(soup):
 	block=soup.find_all('div', class_='item_table-wrapper')
 	page_count=soup.find_all('a', class_='pagination-page')
-	try:
-		for item in block:
-			data = {'id': get_id(find_link(item)),
-					'name': find_vacans(item),
+	arr=[]
+	for item in block:
+		data = {'id': get_id(find_link(item)),
+					'name': ' '.join(find_vacans(item).split()),
 					'wage': find_wage(item),
 					'date': transform_date(find_date(item)),
 					'town': ' '.join(find_town(item).split()),
 					'firm': ' '.join(find_firm(item).split()),
 					'link': find_link(item)
 					}
-			write_csv(data)
-	except:
-			print('error')		
+		arr.append(data)
+	write_csv(arr)
+	
+				
 	
 
 def find_vacans(link):
@@ -128,14 +128,14 @@ def get_pagination_last(url):
 def main():
 	areas=['https://www.avito.ru/kaluga/vakansii?p={}']
 	
-	try:
-		for pattern in areas:
-			last_count=get_pagination_last(pattern)
-			for i in range(1, last_count):
-				url = pattern.format(str(i))
-				get_html(get_page(url))
-	except:
-			print('error main loop')
+	
+	for pattern in areas:
+		last_count=get_pagination_last(pattern)
+		for i in range(1, 3):
+			url = pattern.format(str(i))
+			get_html(get_page(url))
+	
+			
 		
 if __name__ == "__main__":
 	main()
