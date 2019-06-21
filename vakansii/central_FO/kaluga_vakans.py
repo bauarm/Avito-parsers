@@ -13,29 +13,21 @@ def transform_date(data):
 	if 'Сегодня' in data:
 		elem=data.replace('Сегодня', str("{}.{}.{}".format(today.day, today.month, today.year)))
 		return elem
-		#print(elem)
 	if 'Вчера' in data:
-		elem=data.replace('Вчера', str("{}.{}.{}".format(today.day-1, today.month, today.year)))# datetime.date.today().day-1
+		elem=data.replace('Вчера', str("{}.{}.{}".format(today.day-1, today.month, today.year)))
 		return elem
-		#print(elem)
-		#print("{}.{}.{}".format(today.day, today.month, today.year))      # 2.5.2017
 	else:
 		return data	
 	
 	
 
 
-def write_csv(data):
-	today=datetime.datetime.now()
-	file_name= str("./work_files/kaluga_vakans/kaluga&obl_vakant_{}_{}_{}__{}_{}".format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
-	fieldnames = ['id','name','wage','date','town','firm','link']
+def write_csv(data, file_name):
 	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
-		writer.writeheader()
 		for note in data:
 			writer.writerow(note)
-		
-
+	
 
 def get_page(url):
 	headers={'accept':'*/*',
@@ -49,22 +41,27 @@ def get_page(url):
 		print('ERROR', request.status_code)
 	 
 
-def get_html(soup):
+def get_html(soup, file_name): #  передает имя файла для записи и перезаписи
 	block=soup.find_all('div', class_='item_table-wrapper')
 	page_count=soup.find_all('a', class_='pagination-page')
 	arr=[]
-	for item in block:
-		data = {'id': get_id(find_link(item)),
-					'name': ' '.join(find_vacans(item).split()),
-					'wage': find_wage(item),
-					'date': transform_date(find_date(item)),
-					'town': ' '.join(find_town(item).split()),
-					'firm': ' '.join(find_firm(item).split()),
-					'link': find_link(item)
-					}
-		arr.append(data)
-	write_csv(arr)
+	try:
+
+
+		for item in block:
+			data = {'id': get_id(find_link(item)),
+						'name': ' '.join(find_vacans(item).split()),
+						'wage': find_wage(item),
+						'date': transform_date(find_date(item)),
+						'town': ' '.join(find_town(item).split()),
+						'firm': ' '.join(find_firm(item).split()),
+						'link': find_link(item)
+						}
+			arr.append(data)
+		write_csv(arr, file_name)
 	
+	except Exception as e:
+		print(e.__class__)
 				
 	
 
@@ -72,7 +69,7 @@ def find_vacans(link):
 	vacant=link.find('a', class_='item-description-title-link')
 	elem=vacant.text
 	#print(elem)
-	return elem
+	return elem.lower()
 
 def find_wage(link):
 	wage=link.find('span', class_='price')
@@ -125,17 +122,25 @@ def get_pagination_last(url):
 		else:
 			continue
 
-def main():
-	areas=['https://www.avito.ru/kaluga/vakansii?p={}']
+def main(file_name):
+	areas=['https://www.avito.ru/kaluzhskaya_oblast/vakansii?p={}']
+	try:
+		for pattern in areas:
+			last_count=get_pagination_last(pattern)
+			for i in range(1, last_count):
+				url = pattern.format(str(i))
+				get_html(get_page(url), file_name)
 	
-	
-	for pattern in areas:
-		last_count=get_pagination_last(pattern)
-		for i in range(1, 3):
-			url = pattern.format(str(i))
-			get_html(get_page(url))
+	except Exception as e:
+		print(e.__class__)
 	
 			
 		
 if __name__ == "__main__":
-	main()
+	today=datetime.datetime.now()
+	file_name= str("./work_files/kaluga_vakans/kaluga&obl_vakant_{}_{}_{}__{}_{}".format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
+	fieldnames = ['id','name','wage','date','town','firm','link']
+	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
+		writer = csv.DictWriter(f, fieldnames=fieldnames)
+		writer.writeheader()
+	main(file_name)
