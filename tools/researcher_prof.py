@@ -2,9 +2,9 @@ import csv
 import re
 
 
-#otbor_taxist=['водитель','водитель яндекс','водитель uber','водитель такси','таксист'] # по нулевому индекс идет первомоночальный отбор
+#otbor_taxist=['водитель','водитель яндекс','водитель uber','водитель такси','таксист'] # по нулевому индекс идет первомоночальный отбор ,бинарныйпоиск?
 otbor_taxist=['водител']
-
+gazelist=['водител газел','водитель фотон','водитель грузчик','водитель курьер','водитель экспедитор',' ',' ']
 
  
 def csv_dict_reader():
@@ -15,17 +15,29 @@ def csv_dict_reader():
 		
 		for line in reader:
 			#print(line)
-			profs=(line['name'])
-			wages=(line['wage'])
+			profs={'post':(line['name']),
+				'wage':int((line['wage']))
+				}
 			arr.append(profs)
-			arr_wage.append(wages)
 	dol_cnt=0
-	employ=''
+	prof='водител'
+	wage_result=[]
+	wage_sum=0
 	for dol in arr:
-		result = re.search(r'водител', str(dol))
+		result = re.search(prof, str(dol['post']))
+		
 		if type(result) == re.Match:
-			print(result.string,',',arr_wage[dol_cnt])
+			if dol['wage']>9000:
+				print(dol['wage'])
+				wage_result.append(dol['wage'])
+				wage_sum+=dol['wage']
+			#print(result.string,',',dol['wage'])
 		dol_cnt+=1
+	min_wage=min(wage_result)
+	max_wage=max(wage_result)
+	averg=wage_sum//len(wage_result)
+	print('MIN__',min_wage,',','MAX__',max_wage,',','AVERG__',averg)
+		
  
 
     
