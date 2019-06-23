@@ -8,37 +8,46 @@ def write_csv(data):
 	today=datetime.date.today()
 	file_name= str("{}_{}_{}_word_count2".format(today.day, today.month, today.year)) + '.csv'
 	#print(file_name)
-	with open(file_name, 'a', newline='') as f:
+	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
 		writer = csv.writer(f)
 		writer.writerow((data['word'],
                          data['count']
                          ))
 
+def csv_reader():
+	arr=[]
+	with open('vacancies&salaries_tula&obl_6_2019.csv', mode='r', newline="", encoding='utf-8-sig') as f_obj:
+		reader = csv.DictReader(f_obj, delimiter=',')
+		for line in reader:
+			#print(line)
+			arr.append(line['vakancy'])
+	#print(arr)
+	return ' '.join(arr)
 
-def cutter_letter():
-	with open('taxi_mos.', 'r', encoding='utf-8-sig') as myfile: 
-		data = myfile.read().replace(' ', '').replace(',', '').replace('.', '').lower()
-	arr=list(data)
-	print(arr)
-	return arr
 	
 def cutter_words():
-	unnecessary_sign=['«','»',',','.',':',';','—','\ufeff', '\u2009','0xd0', '0xe2','\n','(',')','']
-	with open('prof_kaluga.txt', 'r',  encoding='utf-8-sig') as myfile: 
-		data = myfile.read()
-	arr=list(data)
-	arr_trash=[]
+	arr=csv_reader()
+	w_arr=[]
+	#print(len(arr))
+	unnecessary_sign=['«','»',',','.',':',';','—','\ufeff', '\u2009','(',')','+','/','"']
 	for item in arr:
+		#print(item)
 		if item in unnecessary_sign:
-			arr.remove(item)
-			arr_trash.append(item)
-		else:
 			continue
-	myString = ''.join(arr)
+		else:
+			w_arr.append(item)
+	
+	
+	#print(len(arr))
+	myString = ''.join(w_arr)
+	#print(myString)
 	arr_words = myString.split(' ')
 	for word in arr_words:
+		#print(len(word))
 		if len(word)<4:
 			arr_words.remove(word)
+			arr_words.append(' ')
+			print(word)
 		else:
 			continue
 	#print(arr_words)

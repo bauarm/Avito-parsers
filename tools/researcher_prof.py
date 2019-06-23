@@ -8,10 +8,22 @@ gazelist=['водител газел','водитель фотон','водит�
 taxist=['водитель яндекс','водитель uber','водитель такси','таксист']
 dalnoboy=['водител газел','водитель фотон','водитель грузчик','водитель курьер','водитель экспедитор']
 
+def write_csv(data, file_name):
+	fieldnames = ['post','wage']
+	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
+		#print(data)
+		writer = csv.DictWriter(f, fieldnames=fieldnames)
+		
+		for note in data:
+			print(note)
+			writer.writerow(note)
+		
+
+
 def csv_dict_reader():
 	arr=[]
 	arr_wage=[]
-	with open('kaluga&obl_vakant_21_6_2019__23_28.csv', mode='r', newline="", encoding='utf-8-sig') as f_obj:
+	with open('Tula&obl_vakant_23_6_2019__11_36.csv', mode='r', newline="", encoding='utf-8-sig') as f_obj:
 		reader = csv.DictReader(f_obj, delimiter=',')
 		
 		for line in reader:
@@ -29,15 +41,18 @@ def csv_dict_reader():
 		
 		if type(result) == re.Match:
 			if dol['wage']>9000:
-				print(dol['wage'])
+				#print(dol['wage'])
 				wage_result.append(dol['wage'])
 				wage_sum+=dol['wage']
 			#print(result.string,',',dol['wage'])
+			#print(result.string,' ')
 		dol_cnt+=1
 	min_wage=min(wage_result)
 	max_wage=max(wage_result)
 	averg=wage_sum//len(wage_result)
-	print('MIN__',min_wage,',','MAX__',max_wage,',','AVERG__',averg)
+	#print('MIN__',min_wage,',','MAX__',max_wage,',','AVERG__',averg)
+	write_csv(arr, 'vacancies&salaries_tula&obl_6_2019.csv')
+	#return profs
 		
  
 #функция собирает общий пул похожих профессий по регионы, по корню слова
