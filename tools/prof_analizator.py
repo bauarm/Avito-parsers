@@ -16,7 +16,7 @@ def write_csv(data):
 
 def csv_reader():
 	arr=[]
-	with open('vacancies&salaries_tula&obl_6_2019.csv', mode='r', newline="", encoding='utf-8-sig') as f_obj:
+	with open('ujasss.csv', mode='r', newline="", encoding='utf-8-sig') as f_obj:
 		reader = csv.DictReader(f_obj, delimiter=',')
 		for line in reader:
 			#print(line)

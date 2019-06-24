@@ -1,7 +1,17 @@
 import csv
 import datetime
 
+def csv_dict_reader():
+	arr=[]
+	arr_wage=[]
+	with open('ujasss.csv', mode='r', newline="", encoding='utf-8-sig') as f_obj:
+		reader = csv.DictReader(f_obj, delimiter=',')
+		for line in reader:
+			#print(line)
 
+			arr.append(line['name'])
+	print(arr)
+	return arr
 
 
 def write_csv(data):
@@ -23,10 +33,13 @@ def cutter_letter():
 	return arr
 	
 def cutter_words():
+	
 	unnecessary_sign=['«','»',',','.',':',';','—','\ufeff', '\u2009','0xd0', '0xe2','\n','(',')','']
+	"""
 	with open('prof_kaluga.txt', 'r',  encoding='utf-8-sig') as myfile: 
 		data = myfile.read()
-	arr=list(data)
+	"""
+	arr=csv_dict_reader()
 	arr_trash=[]
 	for item in arr:
 		if item in unnecessary_sign:
