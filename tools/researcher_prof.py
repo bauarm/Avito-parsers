@@ -15,7 +15,7 @@ def write_csv(data, file_name):
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
 		
 		for note in data:
-			print(note)
+			#print(note)
 			writer.writerow(note)
 		
 
@@ -35,14 +35,16 @@ def csv_dict_reader():
 	dol_cnt=0
 	prof='водител'
 	wage_result=[]
+	prof_result=[]
 	wage_sum=0
 	for dol in arr:
 		result = re.search(prof, str(dol['post']))
-		
+			print('ssd')
 		if type(result) == re.Match:
-			if dol['wage']>9000:
-				#print(dol['wage'])
+			if dol['wage']>100000:
+				
 				wage_result.append(dol['wage'])
+				prof_result.append(dol['name'])
 				wage_sum+=dol['wage']
 			#print(result.string,',',dol['wage'])
 			#print(result.string,' ')
@@ -51,7 +53,7 @@ def csv_dict_reader():
 	max_wage=max(wage_result)
 	averg=wage_sum//len(wage_result)
 	#print('MIN__',min_wage,',','MAX__',max_wage,',','AVERG__',averg)
-	write_csv(arr, 'vacancies&salaries_tula&obl_6_2019.csv')
+	write_csv(prof_result, 'vacancies&salaries_tula&obl_6_2019.csv')
 	#return profs
 		
  
