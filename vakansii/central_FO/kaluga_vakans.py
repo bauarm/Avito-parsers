@@ -41,13 +41,10 @@ def get_page(url):
 		print('ERROR', request.status_code)
 	 
 
-def get_html(soup, file_name): #  передает имя файла для записи и перезаписи
+def get_html(soup, file_name): 
 	block=soup.find_all('div', class_='item_table-wrapper')
-	page_count=soup.find_all('a', class_='pagination-page')
 	arr=[]
 	try:
-
-
 		for item in block:
 			data = {'id': get_id(find_link(item)),
 						'name': ' '.join(find_vacans(item).split()),
@@ -59,7 +56,6 @@ def get_html(soup, file_name): #  передает имя файла для за
 						}
 			arr.append(data)
 		write_csv(arr, file_name)
-	
 	except Exception as e:
 		print(e.__class__)
 				
@@ -123,7 +119,7 @@ def get_pagination_last(url):
 			continue
 
 def main(file_name):
-	areas=['https://www.avito.ru/moskovskaya_oblast/vakansii?p={}']
+	areas=['https://www.avito.ru/voronezhskaya_oblast/vakansii?p={}']
 	try:
 		for pattern in areas:
 			last_count=get_pagination_last(pattern)
@@ -134,14 +130,19 @@ def main(file_name):
 	except Exception as e:
 		print(e.__class__)
 
-#moskovskaya_oblast
+#'https://www.avito.ru/nizhegorodskaya_oblast/vakansii?p={}' 5 604
+#'https://www.avito.ru/saratovskaya_oblast/vakansii?p={}'  4 196 
+#'https://www.avito.ru/voronezhskaya_oblast/vakansii?p={}'  4 882
+#'https://www.avito.ru/yaroslavskaya_oblast/vakansii?p={}'  2 173
+#'https://www.avito.ru/tverskaya_oblast/vakansii?p={}'  2 732
+#'https://www.avito.ru/moskovskaya_oblast/vakansii?p={}'
 #'https://www.avito.ru/bryanskaya_oblast/vakansii?p={}'
 #'https://www.avito.ru/tulskaya_oblast/vakansii?p={}'	
 #'https://www.avito.ru/kaluzhskaya_oblast/vakansii?p={}'		
 		
 if __name__ == "__main__":
 	today=datetime.datetime.now()
-	file_name= str("./work_files/kaluga_vakans/Moscow_obl_vakant_{}_{}_{}__{}_{}".format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
+	file_name= str("./work_files/kaluga_vakans/Voronezh&obl_vakant_{}_{}_{}__{}_{}".format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
 	fieldnames = ['id','name','wage','date','town','firm','link']
 	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
