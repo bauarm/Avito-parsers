@@ -37,7 +37,7 @@ def get_proxy():
 		soup=BeautifulSoup(request.content,'lxml')
 	else:
 		print('ERROR', request.status_code)
-	tb_rows = soup.find('table', id='proxylisttable').find('tbody').find_all('tr')[1:12]
+	tb_rows = soup.find('table', id='proxylisttable').find('tbody').find_all('tr')[1:6]
 	
 	proxy_list=[]
 	for tr in tb_rows:
@@ -74,8 +74,7 @@ def write_csv(data, file_name):
 def get_page(url, hd, pr):
 	header=hd
 	proxy=pr
-	print(header)
-	print(proxy)
+	soup_collect=[]
 	session=requests.Session()
 	request=session.get(url, headers=header, proxies=proxy, timeout=40)
 	try:
@@ -171,24 +170,25 @@ def get_pagination_last(url,hd, pr):
 		else:
 			continue
 
-def main(file_name):
-	areas=['https://www.avito.ru/nizhegorodskaya_oblast/vakansii?p={}',
-		'https://www.avito.ru/saratovskaya_oblast/vakansii?p={}'
-		]
-	try:
+def main():
+	area_name=['nizhegorodskaya_oblast', 'saratovskaya_oblast']
+	area_pattern='https://www.avito.ru/{}/vakansii?p={}'
 	
-		for pattern in areas:
-			proxy=get_proxy()
-			head=choice(headers)
+	count_area=0
+	for pattern in area_name:
+		print(area_name[count_area])
+		proxy=get_proxy()
+		head=choice(headers)
+		fname=file_maker(area_name[count_area])
+		last_count=get_pagination_last(area_pattern.format(area_name[count_area],str(1)), head, proxy)
+		for i in range(1, 2): #last_count
+			url = area_pattern.format(area_name[count_area],str(i))
+			print('URL___',url)
+			get_html(get_page(url, head,proxy), fname)
 			
-			last_count=get_pagination_last(pattern, head, proxy)
-			for i in range(1, 2): #last_count
-				url = pattern.format(str(i))
-				
-				get_html(get_page(url, head,proxy), file_name)
+		count_area+=1
 	
-	except Exception as e:
-		print('error in main__', e.__class__)	
+	
 	
 
 #'https://www.avito.ru/nizhegorodskaya_oblast/vakansii?p={}' 5 604
@@ -201,11 +201,16 @@ def main(file_name):
 #'https://www.avito.ru/tulskaya_oblast/vakansii?p={}'	
 #'https://www.avito.ru/kaluzhskaya_oblast/vakansii?p={}'		
 		
-if __name__ == "__main__":
+def file_maker(reg_name):
 	today=datetime.datetime.now()
-	file_name= str("./work_files/kaluga_vakans/Voronezh&obl_vakant_{}_{}_{}__{}_{}".format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
+	print(reg_name)
+	file_name= str('./work_files/kaluga_vakans/'+reg_name+'_{}_{}_{}__{}_{}'.format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
+	print(file_name)	
 	fieldnames = ['id','name','wage','date','town','firm','link']
 	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
 		writer.writeheader()
-	main(file_name)
+
+
+if __name__ == "__main__":
+	main()
