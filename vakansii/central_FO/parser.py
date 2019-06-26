@@ -42,15 +42,12 @@ def get_proxy():
 	proxy_list=[]
 	for tr in tb_rows:
 		rdata=tr.find_all('td')
-		
 		ip=rdata[0].text.strip()
 		port=rdata[1].text.strip()
 		prot='https' if 'yes' in rdata[6].text.strip() else 'http'
 		proxy={'protocol':prot, 'ip': ip+':'+port }
 		final_proxy={proxy['protocol']: proxy['ip']}
-		
 		proxy_list.append(final_proxy)
-	#print(choice(proxy_list))
 	return choice(proxy_list)
 
 def transform_date(data):
@@ -80,19 +77,23 @@ def get_page(url, hd, pr):
 	print(header)
 	print(proxy)
 	session=requests.Session()
-	request=session.get(url, headers=header, proxies=proxy)
-	if request.status_code==200:
-		soup=BeautifulSoup(request.content,'lxml')
-		return soup
-	else:
-		print('ERROR', request.status_code)
+	request=session.get(url, headers=header, proxies=proxy, timeout=40)
+	try:
+		if request.status_code==200:
+			soup=BeautifulSoup(request.content,'lxml')
+			return soup
+		else:
+			print('ERROR', request.status_code)
+	except Exception as e:
+		print('error in get_page__', e.__class__)	
 	 
 
 def get_html(soup, file_name): #  передает имя файла для записи и перезаписи
 	block=soup.find_all('div', class_='item_table-wrapper')
 	arr=[]
-	for item in block:
-		data = {'id': get_id(find_link(item)),
+	try:
+		for item in block:
+			data = {'id': get_id(find_link(item)),
 						'name': ' '.join(find_vacans(item).split()),
 						'wage': find_wage(item),
 						'date': transform_date(find_date(item)),
@@ -100,9 +101,11 @@ def get_html(soup, file_name): #  передает имя файла для за
 						'firm': ' '.join(find_firm(item).split()),
 						'link': find_link(item)
 						}
-		arr.append(data)
-	write_csv(arr, file_name)
+			arr.append(data)
+		write_csv(arr, file_name)
 	
+	except Exception as e:
+		print('error in get_html__', e.__class__)	
 	
 	
 
@@ -169,23 +172,23 @@ def get_pagination_last(url,hd, pr):
 			continue
 
 def main(file_name):
-	areas=['https://www.avito.ru/voronezhskaya_oblast/vakansii?p={}',
-			'https://www.avito.ru/nizhegorodskaya_oblast/vakansii?p={}',
-			'https://www.avito.ru/saratovskaya_oblast/vakansii?p={}'
+	areas=['https://www.avito.ru/nizhegorodskaya_oblast/vakansii?p={}',
+		'https://www.avito.ru/saratovskaya_oblast/vakansii?p={}'
+		]
+	try:
+	
+		for pattern in areas:
+			proxy=get_proxy()
+			head=choice(headers)
 			
-			]
+			last_count=get_pagination_last(pattern, head, proxy)
+			for i in range(1, 2): #last_count
+				url = pattern.format(str(i))
+				
+				get_html(get_page(url, head,proxy), file_name)
 	
-	
-	for pattern in areas:
-		proxy=get_proxy()
-		head=choice(headers)
-		
-		last_count=get_pagination_last(pattern, head, proxy)
-		for i in range(1, 2): #last_count
-			url = pattern.format(str(i))
-			
-			get_html(get_page(url, head,proxy), file_name)
-	
+	except Exception as e:
+		print('error in main__', e.__class__)	
 	
 
 #'https://www.avito.ru/nizhegorodskaya_oblast/vakansii?p={}' 5 604
