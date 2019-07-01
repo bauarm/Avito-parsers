@@ -119,7 +119,7 @@ def get_pagination_last(url):
 			continue
 
 def main(file_name):
-	areas=['https://www.avito.ru/voronezhskaya_oblast/vakansii?p={}']
+	areas=['https://www.avito.ru/kaluzhskaya_oblast/vakansii?p={}']
 	try:
 		for pattern in areas:
 			last_count=get_pagination_last(pattern)

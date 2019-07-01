@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import datetime
 import csv
 from random import choice
+import traceback
 
 
 headers=[{'accept':'*/*',
@@ -66,6 +67,7 @@ def transform_date(data):
 
 def write_csv(data, file_name):
 	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
+		fieldnames = ['id','name','wage','date','town','firm','link']
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
 		for note in data:
 			writer.writerow(note)
@@ -82,17 +84,17 @@ def get_page(url, hd, pr):
 			soup=BeautifulSoup(request.content,'lxml')
 			return soup
 		else:
-			print('ERROR', request.status_code)
+			print('ERROR Request', request.status_code)
 	except Exception as e:
-		print('error in get_page__', e.__class__)	
+		print('error in get_page__\n', e.__class__,'\n', traceback.format_exc())	
 	 
 
 def get_html(soup, file_name): #  передает имя файла для записи и перезаписи
 	block=soup.find_all('div', class_='item_table-wrapper')
 	arr=[]
-	try:
-		for item in block:
-			data = {'id': get_id(find_link(item)),
+	
+	for item in block:
+		data = {'id': get_id(find_link(item)),
 						'name': ' '.join(find_vacans(item).split()),
 						'wage': find_wage(item),
 						'date': transform_date(find_date(item)),
@@ -100,11 +102,11 @@ def get_html(soup, file_name): #  передает имя файла для за
 						'firm': ' '.join(find_firm(item).split()),
 						'link': find_link(item)
 						}
-			arr.append(data)
-		write_csv(arr, file_name)
+		arr.append(data)
+		print(file_name)
+	write_csv(arr, file_name)
 	
-	except Exception as e:
-		print('error in get_html__', e.__class__)	
+	
 	
 	
 
@@ -176,14 +178,14 @@ def main():
 	
 	count_area=0
 	for pattern in area_name:
-		print(area_name[count_area])
+		#print(area_name[count_area])
 		proxy=get_proxy()
 		head=choice(headers)
 		fname=file_maker(area_name[count_area])
 		last_count=get_pagination_last(area_pattern.format(area_name[count_area],str(1)), head, proxy)
 		for i in range(1, 2): #last_count
 			url = area_pattern.format(area_name[count_area],str(i))
-			print('URL___',url)
+			#print('URL___',url)
 			get_html(get_page(url, head,proxy), fname)
 			
 		count_area+=1
@@ -203,13 +205,14 @@ def main():
 		
 def file_maker(reg_name):
 	today=datetime.datetime.now()
-	print(reg_name)
+	#print(reg_name)
 	file_name= str('./work_files/kaluga_vakans/'+reg_name+'_{}_{}_{}__{}_{}'.format(today.day, today.month, today.year, today.hour,today.minute )) + '.csv'
-	print(file_name)	
+	#print(file_name)	
 	fieldnames = ['id','name','wage','date','town','firm','link']
 	with open(file_name, 'a', newline='', encoding='utf-8-sig') as f:
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
 		writer.writeheader()
+	return file_name
 
 
 if __name__ == "__main__":
